@@ -50,5 +50,14 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+      // Load saved products from localStorage if available
+      const savedProducts = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      if (savedProducts.length > 0) {
+        loadProducts(savedProducts);
+      } else {
+        loadProducts(products); // default ones from script.js
+      }
+    </script>
 </body>
 </html>
