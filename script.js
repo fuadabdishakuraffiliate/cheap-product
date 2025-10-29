@@ -1,4 +1,4 @@
-// List of affiliate products
+// Default product list (only shows if localStorage is empty)
 const products = [
   {
     name: "Wireless Bluetooth Headphones",
@@ -11,26 +11,31 @@ const products = [
     description: "Track your steps, heart rate, and notifications easily.",
     image: "https://via.placeholder.com/300x200",
     link: "https://clickbank.com/example-affiliate-link"
-  },
-  {
-    name: "Portable Smoothie Blender",
-    description: "Rechargeable blender for shakes and smoothies anywhere.",
-    image: "https://via.placeholder.com/300x200",
-    link: "https://jumia.co.ke/example-affiliate-link"
   }
 ];
 
-// Render products on page
-const productGrid = document.getElementById("product-grid");
+// Function to render products on the page
+function loadProducts(productList) {
+  const productGrid = document.getElementById("product-grid");
+  productGrid.innerHTML = "";
 
-products.forEach(product => {
-  const div = document.createElement("div");
-  div.classList.add("product");
-  div.innerHTML = `
-    <img src="${product.image}" alt="${product.name}">
-    <h3>${product.name}</h3>
-    <p>${product.description}</p>
-    <a href="${product.link}" target="_blank" class="btn">Buy Now</a>
-  `;
-  productGrid.appendChild(div);
-});
+  productList.forEach(product => {
+    const div = document.createElement("div");
+    div.classList.add("product");
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h3>${product.name}</h3>
+      <p>${product.description}</p>
+      <a href="${product.link}" target="_blank" class="btn">Buy Now</a>
+    `;
+    productGrid.appendChild(div);
+  });
+}
+
+// Load default or saved products
+const savedProducts = JSON.parse(localStorage.getItem("cheProducts")) || [];
+if (savedProducts.length > 0) {
+  loadProducts(savedProducts);
+} else {
+  loadProducts(products);
+}
