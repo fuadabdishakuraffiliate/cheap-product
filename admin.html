@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Che Products</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <h2>Admin Dashboard</h2>
+    <div id="login-section">
+      <p>Enter admin password:</p>
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="checkLogin()" class="btn">Login</button>
+    </div>
+
+    <div id="form-section" class="hidden">
+      <h3>Add a New Product</h3>
+      <input type="text" id="productName" placeholder="Product Name" required>
+      <textarea id="productDesc" placeholder="Product Description" required></textarea>
+      <input type="text" id="productImage" placeholder="Image URL" required>
+      <input type="text" id="productLink" placeholder="Affiliate Link" required>
+      <button onclick="addProduct()" class="btn">Add Product</button>
+      <p id="status"></p>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "cheadmin123"; // 🔐 Change this password anytime!
+
+    function checkLogin() {
+      const entered = document.getElementById("password").value;
+      if (entered === ADMIN_PASSWORD) {
+        document.getElementById("login-section").classList.add("hidden");
+        document.getElementById("form-section").classList.remove("hidden");
+      } else {
+        alert("Incorrect password!");
+      }
+    }
+
+    function addProduct() {
+      const name = document.getElementById("productName").value;
+      const desc = document.getElementById("productDesc").value;
+      const image = document.getElementById("productImage").value;
+      const link = document.getElementById("productLink").value;
+
+      if (!name || !desc || !image || !link) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const newProduct = { name, description: desc, image, link };
+      const currentProducts = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      currentProducts.push(newProduct);
+      localStorage.setItem("cheProducts", JSON.stringify(currentProducts));
+
+      document.getElementById("status").innerText = "✅ Product added successfully!";
+      document.getElementById("productName").value = "";
+      document.getElementById("productDesc").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("productLink").value = "";
+    }
+  </script>
+</body>
+</html>
