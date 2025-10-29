@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Che Products</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       background: #f4f4f9;
+      font-family: Arial, sans-serif;
     }
     .admin-container {
       max-width: 600px;
@@ -15,7 +16,7 @@
       background: white;
       padding: 25px;
       border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     input, textarea {
       width: 100%;
@@ -41,9 +42,6 @@
     .hidden {
       display: none;
     }
-    .product-list {
-      margin-top: 20px;
-    }
     .product-item {
       border: 1px solid #ddd;
       padding: 10px;
@@ -67,6 +65,12 @@
     .edit-btn:hover {
       background: #d4ac0d;
     }
+    img.thumb {
+      max-width: 80px;
+      border-radius: 6px;
+      display: block;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -75,32 +79,36 @@
 
     <div id="login-section">
       <p>Enter admin password:</p>
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="checkLogin()" class="btn">Login</button>
+      <input type="password" id="password" placeholder="Password" />
+      <button id="loginBtn" class="btn">Login</button>
     </div>
 
     <div id="form-section" class="hidden">
       <h3 id="formTitle">Add a New Product</h3>
-      <input type="text" id="productName" placeholder="Product Name" required>
+      <input type="text" id="productName" placeholder="Product Name" required />
       <textarea id="productDesc" placeholder="Product Description" required></textarea>
-      <input type="text" id="productImage" placeholder="Image URL" required>
-      <input type="text" id="productLink" placeholder="Affiliate Link" required>
-      <button id="addBtn" onclick="addProduct()" class="btn">Add Product</button>
-      <button id="saveEditBtn" onclick="saveEdit()" class="btn hidden">Save Changes</button>
+      <input type="text" id="productImage" placeholder="Image URL" required />
+      <input type="text" id="productLink" placeholder="Affiliate Link" required />
+      <button id="addBtn" class="btn">Add Product</button>
+      <button id="saveEditBtn" class="btn hidden">Save Changes</button>
       <p id="status"></p>
 
       <h3>Existing Products</h3>
-      <div id="productList" class="product-list"></div>
+      <div id="productList"></div>
     </div>
   </div>
 
   <script>
-    const ADMIN_PASSWORD = "cheadmin123"; // Change this anytime
-
+    const ADMIN_PASSWORD = "cheadmin123"; // You can change this
     let editIndex = null;
 
+    // Event listeners
+    document.getElementById("loginBtn").addEventListener("click", checkLogin);
+    document.getElementById("addBtn").addEventListener("click", addProduct);
+    document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
+
     function checkLogin() {
-      const entered = document.getElementById("password").value;
+      const entered = document.getElementById("password").value.trim();
       if (entered === ADMIN_PASSWORD) {
         document.getElementById("login-section").classList.add("hidden");
         document.getElementById("form-section").classList.remove("hidden");
@@ -121,10 +129,9 @@
         return;
       }
 
-      const newProduct = { name, description: desc, image, link };
-      const currentProducts = JSON.parse(localStorage.getItem("cheProducts")) || [];
-      currentProducts.push(newProduct);
-      localStorage.setItem("cheProducts", JSON.stringify(currentProducts));
+      const products = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      products.push({ name, description: desc, image, link });
+      localStorage.setItem("cheProducts", JSON.stringify(products));
 
       resetForm();
       document.getElementById("status").innerText = "✅ Product added successfully!";
@@ -141,7 +148,76 @@
         return;
       }
 
-      products.forEach((p, index) => {
+      products.forEach((p, i) => {
         const div = document.createElement("div");
         div.className = "product-item";
-        div.i
+        div.innerHTML = `
+          <strong>${p.name}</strong><br>
+          <small>${p.description}</small><br>
+          <img src="${p.image}" class="thumb" alt="Product Image"><br>
+          <a href="${p.link}" target="_blank">${p.link}</a>
+          <div class="product-actions">
+            <button class="btn edit-btn" onclick="editProduct(${i})">Edit</button>
+            <button class="btn delete-btn" onclick="deleteProduct(${i})">Delete</button>
+          </div>
+        `;
+        productList.appendChild(div);
+      });
+    }
+
+    function deleteProduct(index) {
+      if (!confirm("Are you sure you want to delete this product?")) return;
+      const products = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      products.splice(index, 1);
+      localStorage.setItem("cheProducts", JSON.stringify(products));
+      displayProducts();
+      alert("🗑️ Product deleted!");
+    }
+
+    function editProduct(index) {
+      const products = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      const p = products[index];
+      document.getElementById("productName").value = p.name;
+      document.getElementById("productDesc").value = p.description;
+      document.getElementById("productImage").value = p.image;
+      document.getElementById("productLink").value = p.link;
+
+      document.getElementById("formTitle").innerText = "Edit Product";
+      document.getElementById("addBtn").classList.add("hidden");
+      document.getElementById("saveEditBtn").classList.remove("hidden");
+      editIndex = index;
+    }
+
+    function saveEdit() {
+      const name = document.getElementById("productName").value.trim();
+      const desc = document.getElementById("productDesc").value.trim();
+      const image = document.getElementById("productImage").value.trim();
+      const link = document.getElementById("productLink").value.trim();
+
+      if (!name || !desc || !image || !link) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const products = JSON.parse(localStorage.getItem("cheProducts")) || [];
+      products[editIndex] = { name, description: desc, image, link };
+      localStorage.setItem("cheProducts", JSON.stringify(products));
+
+      resetForm();
+      displayProducts();
+      document.getElementById("status").innerText = "✅ Product updated successfully!";
+    }
+
+    function resetForm() {
+      document.getElementById("productName").value = "";
+      document.getElementById("productDesc").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("productLink").value = "";
+      document.getElementById("formTitle").innerText = "Add a New Product";
+      document.getElementById("addBtn").classList.remove("hidden");
+      document.getElementById("saveEditBtn").classList.add("hidden");
+      editIndex = null;
+    }
+  </script>
+</body>
+</html>
